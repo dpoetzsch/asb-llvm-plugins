@@ -41,39 +41,6 @@ public:
 
     return true;
   }
-
-  void HandleTranslationUnit(ASTContext& context) override {
-    if (!Instance.getLangOpts().DelayedTemplateParsing)
-      return;
-
-    // This demonstrates how to force instantiation of some templates in
-    // -fdelayed-template-parsing mode. (Note: Doing this unconditionally for
-    // all templates is similar to not using -fdelayed-template-parsig in the
-    // first place.)
-    // The advantage of doing this in HandleTranslationUnit() is that all
-    // codegen (when using -add-plugin) is completely finished and this can't
-    // affect the compiler output.
-    struct Visitor : public RecursiveASTVisitor<Visitor> {
-      const std::set<std::string> &ParsedTemplates;
-      Visitor(const std::set<std::string> &ParsedTemplates)
-          : ParsedTemplates(ParsedTemplates) {}
-      bool VisitFunctionDecl(FunctionDecl *FD) {
-        if (FD->isLateTemplateParsed() &&
-            ParsedTemplates.count(FD->getNameAsString()))
-          LateParsedDecls.insert(FD);
-        return true;
-      }
-
-      std::set<FunctionDecl*> LateParsedDecls;
-    } v(ParsedTemplates);
-    v.TraverseDecl(context.getTranslationUnitDecl());
-    clang::Sema &sema = Instance.getSema();
-    for (const FunctionDecl *FD : v.LateParsedDecls) {
-      clang::LateParsedTemplate* LPT = sema.LateParsedTemplateMap.lookup(FD);
-      sema.LateTemplateParser(sema.OpaqueParser, *LPT);
-      llvm::errs() << "late-parsed-decl: \"" << FD->getNameAsString() << "\"\n";
-    }   
-  }
 };
 
 class TheTestAction : public PluginASTAction {
@@ -86,26 +53,6 @@ protected:
 
   bool ParseArgs(const CompilerInstance &CI,
                  const std::vector<std::string> &args) override {
-    for (unsigned i = 0, e = args.size(); i != e; ++i) {
-      llvm::errs() << "TheTest arg = " << args[i] << "\n";
-
-      // Example error handling.
-      DiagnosticsEngine &D = CI.getDiagnostics();
-      if (args[i] == "-an-error") {
-        unsigned DiagID = D.getCustomDiagID(DiagnosticsEngine::Error,
-                                            "invalid argument '%0'");
-        D.Report(DiagID) << args[i];
-        return false;
-      } else if (args[i] == "-parse-template") {
-        if (i + 1 >= e) {
-          D.Report(D.getCustomDiagID(DiagnosticsEngine::Error,
-                                     "missing -parse-template argument"));
-          return false;
-        }
-        ++i;
-        ParsedTemplates.insert(args[i]);
-      }
-    }
     if (!args.empty() && args[0] == "help")
       PrintHelp(llvm::errs());
 
