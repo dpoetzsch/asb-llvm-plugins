@@ -23,16 +23,34 @@ using namespace clang;
 
 namespace {
 
+class TheTestVisitor
+  : public RecursiveASTVisitor<TheTestVisitor> {
+public:
+  explicit TheTestVisitor(ASTContext *context)
+    : context(context) {}
+
+  bool TraverseCStyleCastExpr(CStyleCastExpr *expr) {
+    FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
+    if (fullLocation.isValid())
+      llvm::outs() << "Found cstyle cast at "
+                   << fullLocation.getSpellingLineNumber() << ":"
+                   << fullLocation.getSpellingColumnNumber() << "\n";
+    return true;
+  }
+
+private:
+  ASTContext *context;
+};
+
 class TheTestConsumer : public ASTConsumer {
-  CompilerInstance &Instance;
-  std::set<std::string> ParsedTemplates;
+private:
+  TheTestVisitor visitor;
 
 public:
-  TheTestConsumer(CompilerInstance &Instance,
-                         std::set<std::string> ParsedTemplates)
-      : Instance(Instance), ParsedTemplates(ParsedTemplates) {}
+  explicit TheTestConsumer(ASTContext *context)
+      : visitor(context) {}
 
-  bool HandleTopLevelDecl(DeclGroupRef DG) override {
+  /*bool HandleTopLevelDecl(DeclGroupRef DG) override {
     for (DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; ++i) {
       const Decl *D = *i;
       if (const NamedDecl *ND = dyn_cast<NamedDecl>(D))
@@ -40,6 +58,10 @@ public:
     }
 
     return true;
+  }*/
+  
+  virtual void HandleTranslationUnit(clang::ASTContext &Context) {
+    visitor.TraverseDecl(Context.getTranslationUnitDecl());
   }
 };
 
@@ -48,7 +70,7 @@ class TheTestAction : public PluginASTAction {
 protected:
   std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
                                                  llvm::StringRef) override {
-    return llvm::make_unique<TheTestConsumer>(CI, ParsedTemplates);
+    return llvm::make_unique<TheTestConsumer>(&CI.getASTContext());
   }
 
   bool ParseArgs(const CompilerInstance &CI,
