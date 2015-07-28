@@ -38,17 +38,25 @@ public:
     if (expr->getCastKind() == CK_IntegralToPointer && castType == IntToPtr) {
       FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
       if (fullLocation.isValid())
-        llvm::outs() << "Found integer to pointer cast at "
+        llvm::outs() << "\033[1;34m Found integer to pointer \033[0m"
+                     <<  "\033[1;37m cast at" 
                      << fullLocation.getSpellingLineNumber() << ":"
-                     << fullLocation.getSpellingColumnNumber() << "\n";
+                     << fullLocation.getSpellingColumnNumber() 
+                     << "\033[0m \033[1;31m"
+                     << " in file: " << context->getSourceManager().getFilename(fullLocation) 
+                     << "\033[0m\n";
     }
     
     if (expr->getCastKind() == CK_PointerToIntegral && castType == PtrToInt) {
       FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
       if (fullLocation.isValid())
-        llvm::outs() << "Found pointer to integer cast at "
+        llvm::outs() << "\033[1;34m Found pointer to integer \033[0m"
+                     <<  "\033[1;37m cast at" 
                      << fullLocation.getSpellingLineNumber() << ":"
-                     << fullLocation.getSpellingColumnNumber() << "\n";
+                     << fullLocation.getSpellingColumnNumber() 
+                     << "\033[0m \033[1;31m"
+                     << " in file: " << context->getSourceManager().getFilename(fullLocation) 
+                     << "\033[0m\n";
     }
     
     
