@@ -31,11 +31,13 @@ public:
 
   bool TraverseCStyleCastExpr(CStyleCastExpr *expr) {
     if (expr->getTypeInfoAsWritten()->getType()->isPointerType()) {
-      FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
-      if (fullLocation.isValid())
-        llvm::outs() << "Found cstyle cast at "
-                     << fullLocation.getSpellingLineNumber() << ":"
-                     << fullLocation.getSpellingColumnNumber() << "\n";
+      if (!expr->getSubExpr()->getType()->isPointerType()) {
+        FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
+        if (fullLocation.isValid())
+          llvm::outs() << "Found cstyle cast at "
+                       << fullLocation.getSpellingLineNumber() << ":"
+                       << fullLocation.getSpellingColumnNumber() << "\n";
+        }
     }
     
     return true;

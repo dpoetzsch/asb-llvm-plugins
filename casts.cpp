@@ -8,5 +8,6 @@ int main()
  int z = (int) l;
  int *r= (int *) l;
  intptr ptr =(intptr) l;
+ void* yetAnotherPtr = (void*) ptr;
  return 0; 
 }
