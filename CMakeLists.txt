@@ -1,1 +1,1 @@
-add_subdirectory(the-test)
+add_subdirectory(detect-ptr-casts)

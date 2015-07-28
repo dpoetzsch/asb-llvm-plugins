@@ -25,12 +25,12 @@ namespace {
 
 enum CastType { IntToPtr, PtrToInt};
 
-class TheTestVisitor
-  : public RecursiveASTVisitor<TheTestVisitor> {
+class DetectPtrCastsVisitor
+  : public RecursiveASTVisitor<DetectPtrCastsVisitor> {
 
 public:
   
-  explicit TheTestVisitor(ASTContext *context, CastType castType)
+  explicit DetectPtrCastsVisitor(ASTContext *context, CastType castType)
     : context(context), castType(castType) {}
 
   bool TraverseCStyleCastExpr(CStyleCastExpr *expr) {
@@ -60,11 +60,11 @@ private:
   CastType castType;
 };
 
-class TheTestConsumer : public ASTConsumer {
+class DetectPtrCastsConsumer : public ASTConsumer {
 private:
-  TheTestVisitor visitor;
+  DetectPtrCastsVisitor visitor;
 public:
-  explicit TheTestConsumer(ASTContext *context, CastType castType)
+  explicit DetectPtrCastsConsumer(ASTContext *context, CastType castType)
       : visitor(context,castType)  {}
 
   /*bool HandleTopLevelDecl(DeclGroupRef DG) override {
@@ -82,7 +82,7 @@ public:
   }
 };
 
-class TheTestAction : public PluginASTAction {
+class DetectPtrCastsAction : public PluginASTAction {
   
    CastType castType;
 
@@ -90,7 +90,7 @@ protected:
 
   std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
                                                  llvm::StringRef) override {
-    return llvm::make_unique<TheTestConsumer>(&CI.getASTContext(), castType);
+    return llvm::make_unique<DetectPtrCastsConsumer>(&CI.getASTContext(), castType);
   }
 
   bool ParseArgs(const CompilerInstance &CI,
@@ -106,12 +106,12 @@ protected:
   }
   
   void PrintHelp(llvm::raw_ostream& ros) {
-    ros << "Help for TheTest plugin goes here\n";
+    ros << "Help for DetectPtrCasts plugin goes here\n";
   }
 
 };
 
 }
 
-static FrontendPluginRegistry::Add<TheTestAction>
-X("the-test", "the awesome test");
+static FrontendPluginRegistry::Add<DetectPtrCastsAction>
+X("detect-ptr-casts", "detect pointer casts");

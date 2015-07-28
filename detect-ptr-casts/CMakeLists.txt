@@ -4,15 +4,15 @@ if( NOT MSVC ) # MSVC mangles symbols differently, and
                 # PrintFunctionNames.export contains C++ symbols.
   if( NOT LLVM_REQUIRES_RTTI )
     if( NOT LLVM_REQUIRES_EH )
-      set(LLVM_EXPORTED_SYMBOL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/TheTest.exports)
+      set(LLVM_EXPORTED_SYMBOL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/DetectPtrCasts.exports)
     endif()
   endif()
 endif()
 
-add_llvm_loadable_module(TheTest TheTest.cpp)
+add_llvm_loadable_module(DetectPtrCasts DetectPtrCasts.cpp)
 
 if(LLVM_ENABLE_PLUGINS AND (WIN32 OR CYGWIN))
-  target_link_libraries(TheTest ${cmake_2_8_12_PRIVATE}
+  target_link_libraries(DetectPtrCasts ${cmake_2_8_12_PRIVATE}
     clangAST
     clangBasic
     clangFrontend
