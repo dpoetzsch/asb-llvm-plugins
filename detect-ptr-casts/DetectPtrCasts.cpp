@@ -39,11 +39,11 @@ public:
       FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
       if (fullLocation.isValid())
         llvm::outs() << "\033[1;34m Found integer to pointer \033[0m"
-                     <<  "\033[1;37m cast at" 
+                     <<  "\033[1;37mcast at " 
                      << fullLocation.getSpellingLineNumber() << ":"
                      << fullLocation.getSpellingColumnNumber() 
                      << "\033[0m \033[1;31m"
-                     << " in file: " << context->getSourceManager().getFilename(fullLocation) 
+                     << "in file: " << context->getSourceManager().getFilename(fullLocation) 
                      << "\033[0m\n";
     }
     
@@ -51,11 +51,11 @@ public:
       FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
       if (fullLocation.isValid())
         llvm::outs() << "\033[1;34m Found pointer to integer \033[0m"
-                     <<  "\033[1;37m cast at" 
+                     <<  "\033[1;37mcast at " 
                      << fullLocation.getSpellingLineNumber() << ":"
                      << fullLocation.getSpellingColumnNumber() 
                      << "\033[0m \033[1;31m"
-                     << " in file: " << context->getSourceManager().getFilename(fullLocation) 
+                     << "in file: " << context->getSourceManager().getFilename(fullLocation) 
                      << "\033[0m\n";
     }
     
