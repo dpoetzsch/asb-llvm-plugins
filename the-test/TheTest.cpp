@@ -23,35 +23,49 @@ using namespace clang;
 
 namespace {
 
+enum CastType { IntToPtr, PtrToInt};
+
 class TheTestVisitor
   : public RecursiveASTVisitor<TheTestVisitor> {
+
 public:
-  explicit TheTestVisitor(ASTContext *context)
-    : context(context) {}
+  
+  explicit TheTestVisitor(ASTContext *context, CastType castType)
+    : context(context), castType(castType) {}
 
   bool TraverseCStyleCastExpr(CStyleCastExpr *expr) {
-    if (expr->getCastKind() == CK_IntegralToPointer) {
+   
+    if (expr->getCastKind() == CK_IntegralToPointer && castType == IntToPtr) {
       FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
       if (fullLocation.isValid())
-        llvm::outs() << "Found cstyle cast at "
+        llvm::outs() << "Found integer to pointer cast at "
                      << fullLocation.getSpellingLineNumber() << ":"
                      << fullLocation.getSpellingColumnNumber() << "\n";
     }
+    
+    if (expr->getCastKind() == CK_PointerToIntegral && castType == PtrToInt) {
+      FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
+      if (fullLocation.isValid())
+        llvm::outs() << "Found pointer to integer cast at "
+                     << fullLocation.getSpellingLineNumber() << ":"
+                     << fullLocation.getSpellingColumnNumber() << "\n";
+    }
+    
     
     return true;
   }
 
 private:
   ASTContext *context;
+  CastType castType;
 };
 
 class TheTestConsumer : public ASTConsumer {
 private:
   TheTestVisitor visitor;
-
 public:
-  explicit TheTestConsumer(ASTContext *context)
-      : visitor(context) {}
+  explicit TheTestConsumer(ASTContext *context, CastType castType)
+      : visitor(context,castType)  {}
 
   /*bool HandleTopLevelDecl(DeclGroupRef DG) override {
     for (DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; ++i) {
@@ -69,11 +83,14 @@ public:
 };
 
 class TheTestAction : public PluginASTAction {
-  std::set<std::string> ParsedTemplates;
+  
+   CastType castType;
+
 protected:
+
   std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
                                                  llvm::StringRef) override {
-    return llvm::make_unique<TheTestConsumer>(&CI.getASTContext());
+    return llvm::make_unique<TheTestConsumer>(&CI.getASTContext(), castType);
   }
 
   bool ParseArgs(const CompilerInstance &CI,
@@ -81,8 +98,13 @@ protected:
     if (!args.empty() && args[0] == "help")
       PrintHelp(llvm::errs());
 
+    if (!args.empty() && args[0] == "p2i")
+      castType=PtrToInt;
+    else castType=IntToPtr;
+
     return true;
   }
+  
   void PrintHelp(llvm::raw_ostream& ros) {
     ros << "Help for TheTest plugin goes here\n";
   }
