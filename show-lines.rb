@@ -34,25 +34,36 @@ end
 files = Dir["**/*"]
 
 showval = 1
-if ARGV[0]=="-show" 
-  ARGV.shift
-  showval = ARGV.shift.to_i
+noconst = false
+
+loop do
+  case ARGV[0]
+  when "-show" 
+    ARGV.shift
+    showval = ARGV.shift.to_i
+  when "-noconst"
+    ARGV.shift
+    noconst = true
+  else
+    break
+  end
 end
 
 ARGF.read.split("\n").each do |line|
   if line =~ /cast at\s?(\d+):.+in file: (.+\.\w+)/
-    #puts "#$2 line #$1"
-    puts line
+    if not noconst or not line.include?("constant")
+      puts line
 
-    if showval > 0
-      file = files.find { |f| f.end_with? $2 }
-      l = $1.to_i - 1
-      flines = File.read(file).split("\n")
-    
-      puts flines[l-(showval-1)..l-1]
-      puts flines[l].yellow
-      puts flines[l+1..l+showval-1] 
+      if showval > 0
+        file = files.find { |f| f.end_with? $2 }
+        l = $1.to_i - 1
+        flines = File.read(file).split("\n")
+      
+        puts flines[l-(showval-1)..l-1]
+        puts flines[l].yellow
+        puts flines[l+1..l+showval-1] 
+      end
+      puts
     end
-    puts
   end
 end
