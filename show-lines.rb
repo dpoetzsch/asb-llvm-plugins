@@ -31,31 +31,27 @@ class String
   end
 end
 
-files = Dir["**/*.c"]
+files = Dir["**/*"]
 
-showall=false
+showval = 1
 if ARGV[0]=="-show" 
   ARGV.shift
-  show = true
-  val =ARGV.shift.to_i
+  showval = ARGV.shift.to_i
 end
 
 ARGF.read.split("\n").each do |line|
-  if line =~ /cast at\s?(\d+):.+in file: (.+\.c)/
+  if line =~ /cast at\s?(\d+):.+in file: (.+\.\w+)/
     #puts "#$2 line #$1"
     puts line
 
-    file = files.find { |f| f.end_with? $2 }
-    l = $1.to_i - 1
-    if show && val!=0
+    if showval > 0
+      file = files.find { |f| f.end_with? $2 }
+      l = $1.to_i - 1
       flines = File.read(file).split("\n")
-      puts flines[l-val..l-1]
+    
+      puts flines[l-(showval-1)..l-1]
       puts flines[l].yellow
-      puts flines[l+1..l+val]
-    end
-    if !show
-      flines = File.read(file).split("\n")
-      puts flines[l].yellow
+      puts flines[l+1..l+showval-1] 
     end
     puts
   end
