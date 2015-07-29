@@ -57,6 +57,7 @@ public:
                    << "\033[0m \033[1;31m"
                    << "in file: " << context->getSourceManager().getFilename(fullLocation) 
                    << "\033[0m\n";
+      expr->dumpColor();
     }
   }
 
