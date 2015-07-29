@@ -1,0 +1,25 @@
+--- ../../dasdfadsfasdf/gtk+2.0-2.24.23/ltmain.sh	2014-01-07 01:00:44.000000000 -0800
++++ ltmain.sh	2015-07-28 17:35:34.680159920 -0700
+@@ -5462,6 +5462,10 @@
+ 	  func_append finalize_command " $wl$qarg"
+ 	  continue
+ 	  ;;
++	xclang)
++	  prev=
++	  continue
++	  ;;
+ 	*)
+ 	  eval "$prev=\"\$arg\""
+ 	  prev=
+@@ -5831,6 +5835,11 @@
+ 	prev=xcclinker
+ 	continue
+ 	;;
++	
++      -Xclang)
++        prev=xclang
++        continue
++        ;;
+ 
+       # -msg_* for osf cc
+       -msg_*)
