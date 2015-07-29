@@ -34,15 +34,17 @@ public:
     : context(context), castType(castType) {}
 
   bool TraverseCStyleCastExpr(CStyleCastExpr *expr) {
-   
-    if (expr->getCastKind() == CK_IntegralToPointer && castType == IntToPtr) {
+    if ((castType == IntToPtr) && (expr->getCastKind() == CK_IntegralToPointer)) {
+      // if the value that is cast is an integral we can safely ignore it
+      SourceLocation loc = expr->getExprLoc();
+      if (expr->getSubExpr()->isIntegerConstantExpr(*context, &loc)) {
+        printMessage(expr, "constant integer to pointer");
+      } else {
+        printMessage(expr, "integer to pointer");
+      }
+    } else if ((castType == PtrToInt) && (expr->getCastKind() == CK_PointerToIntegral)) {
       printMessage(expr, "integer to pointer");
     }
-    
-    if (expr->getCastKind() == CK_PointerToIntegral && castType == PtrToInt) {
-      printMessage(expr, "integer to pointer");
-    }
-    
     
     return true;
   }

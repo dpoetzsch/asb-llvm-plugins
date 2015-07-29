@@ -11,5 +11,6 @@ int main()
   int *r= (int *) l;
   intptr ptr =(intptr) l;
   void* yetAnotherPtr = (void*) ptr;
+  void* foo = (void*) 0xdeadbeef;
   return 0; 
 }
