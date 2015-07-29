@@ -45,6 +45,7 @@ public:
                      << "\033[0m \033[1;31m"
                      << "in file: " << context->getSourceManager().getFilename(fullLocation) 
                      << "\033[0m\n";
+        expr->dumpColor();
     }
     
     if (expr->getCastKind() == CK_PointerToIntegral && castType == PtrToInt) {
@@ -57,6 +58,7 @@ public:
                      << "\033[0m \033[1;31m"
                      << "in file: " << context->getSourceManager().getFilename(fullLocation) 
                      << "\033[0m\n";
+        expr->dumpColor();
     }
     
     
