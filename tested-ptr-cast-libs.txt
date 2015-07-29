@@ -1,0 +1,16 @@
+== Programs w/o problems ==
+musl
+
+== Programs w/ problems ==
+libgtk-2
+libgtk-3
+
+
+
+
+== Typical Casts ==
+
+* cast of constant integers to pointers (e.g. in the libgtk-2)
+  (just trash values)
+
+* 
