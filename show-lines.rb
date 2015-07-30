@@ -32,25 +32,25 @@ class String
 end
 
 def is_pointer_cast_line?(line)
-  return not line.nil? and line =~ /\(.+?\)/ # check if there is a cast-like thing somewhere
+  return (not line.nil? and line =~ /\(.+?\)/) # check if there is a cast-like thing somewhere
 end
 
 allfiles = Dir["**/*"]
 
-showval = 1
+$showval = 1
 noconst = false
 
 def put_ptr_cast(flines, l)
-  puts flines[l-(showval-1)..l-1]
+  puts flines[l-($showval-1)..l-1]
   puts flines[l].yellow
-  puts flines[l+1..l+showval-1] 
+  puts flines[l+1..l+$showval-1] 
 end
 
 loop do
   case ARGV[0]
   when "-show" 
     ARGV.shift
-    showval = ARGV.shift.to_i
+    $showval = ARGV.shift.to_i
   when "-noconst"
     ARGV.shift
     noconst = true
@@ -74,21 +74,22 @@ ARGF.read.split("\n").each do |line|
     if not noconst or not isice
       puts line
 
-      if showval > 0
+      if $showval > 0
         l = $1.to_i - 1
         files = allfiles.find_all { |f| File.basename(f) == $2 }
         
         if files.empty?
           puts "File not found"
         elsif files.length == 1
+          flines = File.read(files[0]).split("\n")
           put_ptr_cast(flines, l)
         else
-          puts "Found more #{files.length} files; guessing correct one"
+          puts "Found  #{files.length} files; guessing correct one"
           
           files.each do |file|
             flines = File.read(file).split("\n")
             
-            if is_pointer_cast_line(flines[l])
+            if is_pointer_cast_line?(flines[l])
               put_ptr_cast(flines, l)
             end
           end
