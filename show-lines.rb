@@ -66,7 +66,6 @@ ARGF.read.split("\n").each do |line|
 
       if showval > 0
         file = files.find { |f| File.basename(f) == $2 }
-        puts file
         l = $1.to_i - 1
         flines = File.read(file).split("\n")
       
