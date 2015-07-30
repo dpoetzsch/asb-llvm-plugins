@@ -76,7 +76,7 @@ ARGF.read.split("\n").each do |line|
 
       if $showval > 0
         l = $1.to_i - 1
-        files = allfiles.find_all { |f| File.basename(f) == $2 }
+        files = allfiles.find_all { |f| f.end_with?($2) and File.basename(f) == File.basename($2) }
         
         if files.empty?
           puts "File not found"
@@ -94,9 +94,6 @@ ARGF.read.split("\n").each do |line|
             end
           end
         end
-        
-        
-      
         
       end
       puts

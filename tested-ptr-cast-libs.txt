@@ -19,6 +19,11 @@ Total casts: 187 (160 casts of integer constant expressions)
 In Varargs.c and Varget.c, a nested list is created. Each member contains three fields: A value, the type of the value, and a tag indicating wether the value is a pointer to another nested list or not. The value is stored as an int, so uses of the value as a pointer requires a cast.
 This might not be a problem, but when a nested list is linked to another, a ptr to int cast has to be made, and the value shouldn't be changed.
 
+== xedit ==
+Total casts: 31 (26 casts of integer constant expressions)
+The remaining 5 casts seem to be data bytes that for some reason are stored as
+pointers
+
 
 == Summary: Typical usages ==
 * cast of constant integer literals to pointers (e.g. in the libgtk-2)
