@@ -4,7 +4,8 @@ musl
 == Programs w/ problems ==
 libgtk-2
 libgtk-3
-
+libx11: The only int to ptr casts occurs in IMWrap.c:96 (XcopyToArg),
+the cast of a pointer is copied INSIDE another pointer. This might not be a problem unless the destination pointer is casted back to an int (the delta strategy would change the value -> divergence). Uses of XCopyToArg should be investigated. 
 
 
 

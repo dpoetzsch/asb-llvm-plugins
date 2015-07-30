@@ -43,7 +43,7 @@ public:
         printMessage(expr, "integer to pointer");
       }
     } else if ((castType == PtrToInt) && (expr->getCastKind() == CK_PointerToIntegral)) {
-      printMessage(expr, "integer to pointer");
+      printMessage(expr, "pointer to integer");
     }
     
     return true;
@@ -59,7 +59,8 @@ public:
                    << "\033[0m \033[1;31m"
                    << "in file: " << context->getSourceManager().getFilename(fullLocation) 
                    << "\033[0m\n";
-      expr->dumpColor();
+     if (context->getSourceManager().getFilename(fullLocation) == "")
+       expr->dumpColor();
     }
   }
 
