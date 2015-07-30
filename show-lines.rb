@@ -31,10 +31,20 @@ class String
   end
 end
 
-files = Dir["**/*"]
+def is_pointer_cast_line?(line)
+  return not line.nil? and line =~ /\(.+?\)/ # check if there is a cast-like thing somewhere
+end
+
+allfiles = Dir["**/*"]
 
 showval = 1
 noconst = false
+
+def put_ptr_cast(flines, l)
+  puts flines[l-(showval-1)..l-1]
+  puts flines[l].yellow
+  puts flines[l+1..l+showval-1] 
+end
 
 loop do
   case ARGV[0]
@@ -65,13 +75,28 @@ ARGF.read.split("\n").each do |line|
       puts line
 
       if showval > 0
-        file = files.find { |f| File.basename(f) == $2 }
         l = $1.to_i - 1
-        flines = File.read(file).split("\n")
+        files = allfiles.find_all { |f| File.basename(f) == $2 }
+        
+        if files.empty?
+          puts "File not found"
+        elsif files.length == 1
+          put_ptr_cast(flines, l)
+        else
+          puts "Found more #{files.length} files; guessing correct one"
+          
+          files.each do |file|
+            flines = File.read(file).split("\n")
+            
+            if is_pointer_cast_line(flines[l])
+              put_ptr_cast(flines, l)
+            end
+          end
+        end
+        
+        
       
-        puts flines[l-(showval-1)..l-1]
-        puts flines[l].yellow
-        puts flines[l+1..l+showval-1] 
+        
       end
       puts
     end
