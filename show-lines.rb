@@ -95,9 +95,6 @@ ARGF.read.split("\n").each do |line|
           end
         end
         
-        
-      
-        
       end
       puts
     end
