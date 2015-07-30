@@ -24,6 +24,8 @@ Total casts: 31 (26 casts of integer constant expressions)
 The remaining 5 casts seem to be data bytes that for some reason are stored as
 pointers
 
+== xpdf ==
+No casts found unit compilation fails due to semantical analysis errors
 
 == Summary: Typical usages ==
 * cast of constant integer literals to pointers (e.g. in the libgtk-2)
