@@ -2,6 +2,7 @@
 no casts found
 
 ==libx11==
+Total casts: 4 (0 casts of integer constant expressions)
  The only int to ptr casts occurs in IMWrap.c:96 (XcopyToArg),
 the cast of a pointer is copied INSIDE another pointer. This might not be a problem unless the destination pointer is casted back to an int (the delta strategy would change the value -> divergence). Uses of XCopyToArg should be investigated. 
 
@@ -10,8 +11,13 @@ Total casts: 64 (53 casts of integer constant expressions)
 We suspect that the remaining 11 non-i-c-e casts are still constant values.
 
 == libgtk-3 ==
-TODO
+Total casts: 61 (50 casts of integer constant expressions)
+Similar to libx11, a value is stored directly in a pointer. Later use should be investigated?
 
+== libxt ==
+Total casts: 187 (160 casts of integer constant expressions)
+In Varargs.c and Varget.c, a nested list is created. Each member contains three fields: A value, the type of the value, and a tag indicating wether the value is a pointer to another nested list or not. The value is stored as an int, so uses of the value as a pointer requires a cast.
+This might not be a problem, but when a nested list is linked to another, a ptr to int cast has to be made, and the value shouldn't be changed.
 
 
 == Summary: Typical usages ==
