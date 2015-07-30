@@ -12,6 +12,10 @@ We suspect that the remaining 11 non-i-c-e casts are still constant values.
 == libgtk-3 ==
 TODO
 
+== xedit ==
+Total casts: 31 (26 casts of integer constant expressions)
+The remaining 5 casts seem to be data bytes that for some reason are stored as
+pointers
 
 
 == Summary: Typical usages ==
