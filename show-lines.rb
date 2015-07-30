@@ -49,14 +49,23 @@ loop do
   end
 end
 
+totalcasts = 0
+icecasts = 0
+
 ARGF.read.split("\n").each do |line|
   if line =~ /cast at\s?(\d+):.+in file: (.+\.\w+)/
-    if not noconst or not line.include?("constant")
+    totalcasts += 1
+  
+    isice = line.include?("constant")
+    if isice
+      icecasts += 1
+    end
+    
+    if not noconst or not isice
       puts line
 
       if showval > 0
         file = files.find { |f| File.basename(f) == $2 }
-        puts file
         l = $1.to_i - 1
         flines = File.read(file).split("\n")
       
@@ -68,3 +77,6 @@ ARGF.read.split("\n").each do |line|
     end
   end
 end
+
+puts "-------------------------------------------------------------------------"
+puts "Total casts: #{totalcasts} (#{icecasts} casts of integer constant expressions)"

@@ -1,17 +1,20 @@
-== Programs w/o problems ==
-musl
+== musl ==
+no casts found
 
-== Programs w/ problems ==
-libgtk-2
-libgtk-3
-libx11: The only int to ptr casts occurs in IMWrap.c:96 (XcopyToArg),
+==libx11==
+ The only int to ptr casts occurs in IMWrap.c:96 (XcopyToArg),
 the cast of a pointer is copied INSIDE another pointer. This might not be a problem unless the destination pointer is casted back to an int (the delta strategy would change the value -> divergence). Uses of XCopyToArg should be investigated. 
 
+== libgtk-2 ==
+Total casts: 64 (53 casts of integer constant expressions)
+We suspect that the remaining 11 non-i-c-e casts are still constant values.
+
+== libgtk-3 ==
+TODO
 
 
-== Typical Casts ==
 
-* cast of constant integers to pointers (e.g. in the libgtk-2)
-  (just trash values)
-
-* 
+== Summary: Typical usages ==
+* cast of constant integer literals to pointers (e.g. in the libgtk-2)
+  (it seems just for trash values)
+* pass information where ptr type is expected (might be problematic!)
