@@ -34,6 +34,13 @@ Total casts: 5 (0 casts of integer constant expressions)
 casts are : (gpointer) (gintptr) _tmpXXX_. Used in the funcion g_object_set_data_full(object,key,data,NULL). This function creates an association btwn data and key and store it in the object. g_object_get_data() returns a pointer to the 
 data given the object and the key. Do functions cast back this data ptr to an int?
 
+
+== gcc ==
+Total casts: 5 (0 casts of integer constant expressions)
+It is not possible to compile gcc until the end because it compiles xgcc and then uses it. Thus, we can't use clang anymore. 
+The cast found is just used to compare two key nodes from a splay tree. The types of the nodes can be various, there is an int cast and a ptr cast available according to the type of the nodes.
+
+
 == xpdf ==
 No casts found unit compilation fails due to semantical analysis errors
 
