@@ -34,6 +34,9 @@ Total casts: 5 (0 casts of integer constant expressions)
 casts are : (gpointer) (gintptr) _tmpXXX_. Used in the funcion g_object_set_data_full(object,key,data,NULL). This function creates an association btwn data and key and store it in the object. g_object_get_data() returns a pointer to the 
 data given the object and the key. Do functions cast back this data ptr to an int?
 
+== xpdf ==
+No casts found unit compilation fails due to semantical analysis errors
+
 == Summary: Typical usages ==
 * cast of constant integer literals to pointers (e.g. in the libgtk-2)
   (it seems just for trash values)
