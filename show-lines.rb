@@ -70,7 +70,6 @@ ARGF.read.split("\n").each do |line|
     
     while filename =~ /^\.\.?\/(.+)/
       filename = $1
-      puts filename
     end
   
     isice = line.include?("constant")
@@ -82,7 +81,7 @@ ARGF.read.split("\n").each do |line|
       puts line
 
       if $showval > 0
-        files = allfiles.find_all { |f| f.end_with?($2) and File.basename(f) == File.basename($2) }
+        files = allfiles.find_all { |f| f.end_with?(filename) and File.basename(f) == File.basename(filename) }
         
         if files.empty?
           puts "File not found"
