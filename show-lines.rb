@@ -65,6 +65,13 @@ icecasts = 0
 ARGF.read.split("\n").each do |line|
   if line =~ /cast at\s?(\d+):.+in file: (.+\.\w+)/
     totalcasts += 1
+    l = $1.to_i - 1
+    filename = $2
+    
+    while filename =~ /^\.\.?\/(.+)/
+      filename = $1
+      puts filename
+    end
   
     isice = line.include?("constant")
     if isice
@@ -75,7 +82,6 @@ ARGF.read.split("\n").each do |line|
       puts line
 
       if $showval > 0
-        l = $1.to_i - 1
         files = allfiles.find_all { |f| f.end_with?($2) and File.basename(f) == File.basename($2) }
         
         if files.empty?
