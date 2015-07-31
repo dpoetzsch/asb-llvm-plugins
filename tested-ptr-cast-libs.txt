@@ -19,11 +19,20 @@ Total casts: 187 (160 casts of integer constant expressions)
 In Varargs.c and Varget.c, a nested list is created. Each member contains three fields: A value, the type of the value, and a tag indicating wether the value is a pointer to another nested list or not. The value is stored as an int, so uses of the value as a pointer requires a cast.
 This might not be a problem, but when a nested list is linked to another, a ptr to int cast has to be made, and the value shouldn't be changed.
 
+In NextEvent.c:814, a lot of different object's IDs are created by taking their address object. For some reason, they store it as an int :'( .
+
 == xedit ==
 Total casts: 31 (26 casts of integer constant expressions)
 The remaining 5 casts seem to be data bytes that for some reason are stored as
 pointers
 
+== ssh ==
+Total casts: 4 (4 casts of integer constant expressions) **clap**clap**clap**
+
+== gnome-calculator ==
+Total casts: 5 (0 casts of integer constant expressions)
+casts are : (gpointer) (gintptr) _tmpXXX_. Used in the funcion g_object_set_data_full(object,key,data,NULL). This function creates an association btwn data and key and store it in the object. g_object_get_data() returns a pointer to the 
+data given the object and the key. Do functions cast back this data ptr to an int?
 
 == Summary: Typical usages ==
 * cast of constant integer literals to pointers (e.g. in the libgtk-2)
