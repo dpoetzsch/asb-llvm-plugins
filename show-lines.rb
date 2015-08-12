@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-require_relative "colored_str.rb", "util.rb"
+require_relative "colored_str.rb"
+require_relative "util.rb"
 
 def is_pointer_cast_line?(line)
   return (not line.nil? and line =~ /\(.+?\)/) # check if there is a cast-like thing somewhere

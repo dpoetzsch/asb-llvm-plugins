@@ -35,6 +35,10 @@ class TaintGrindOp
     @preds = []
   end
   
+  def is_tmp_var
+    return @var =~ /^t\d+_\d+$/
+  end
+
   def to_s
     lines = guess_path(@file).map { |f| File.read(f).split("\n")[@lineno-1] }.find_all { |l| not l.nil? }
     s = "#@func (#@file:#@lineno):  #{lines[0]}"
@@ -42,9 +46,15 @@ class TaintGrindOp
     return s
   end
   
+  def get_full_path
+    p = @preds.empty? ? [] : @preds.map{|op| op.get_full_path()}.flatten
+    return p.push self
+  end
+  
   def get_path
     p = @preds.empty? ? [] : @preds.map{|op| op.get_path()}.flatten
-    return p.push self
+    p.push self if self.is_sink or not self.is_tmp_var
+    return p
   end
   
   attr_reader :func, :file, :lineno, :var, :from, :preds, :is_sink
