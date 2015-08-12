@@ -10,6 +10,7 @@ class TaintGrindOp
   
   def initialize(line)
     @line = line
+    @is_sink = false
   
     elems = line.split(" | ")
     if elems[0] =~ /0x\w+: (\w+) \((.+):(\d+)\)/  # e.g. 0x40080D: main (two-taints.c:10)
@@ -21,6 +22,10 @@ class TaintGrindOp
     if elems[4] =~ /^(.+?) <- (.+?)$/ # e.g. t54_1741 <- t42_1773, t29_4179
       @var = $1
       @from = $2.split(", ")
+    elsif elems[4] =~ /^(.+?) <\*- (.+?)$/ # e.g. t78_744 <*- t72_268
+      @var = $1
+      @from = $2.split(", ")
+      @is_sink = true
     else  # e.g. t54_1741
       @var = elems[4]
       @from = []
@@ -28,8 +33,6 @@ class TaintGrindOp
     
     if elems[1].start_with? "IF "
       @is_sink = true
-    else
-      @is_sink = false
     end
     
     @preds = []
@@ -41,7 +44,11 @@ class TaintGrindOp
 
   def to_s
     lines = guess_path(@file).map { |f| File.read(f).split("\n")[@lineno-1] }.find_all { |l| not l.nil? }
-    s = "#@func (#@file:#@lineno):  #{lines[0]}"
+    
+    line = lines[0]
+    line = line.red if self.is_sink
+    
+    s = "#@func (#@file:#@lineno):  #{line}"
     s += " (found #{lines.length} matching files}" if lines.length > 1
     return s
   end
@@ -95,6 +102,7 @@ ARGF.read.split("\n").each do |line|
 end
 
 sinks.each do |sink|
+  puts ">>>> The evil cast should occur just before that <<<<"
   puts sink.get_path
   puts "="*40
 end
