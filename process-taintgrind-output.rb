@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative "colored_str.rb"
+require_relative "util.rb"
 
 class TaintGrindOp
   def self.is_taintgrindop_line?(line)
@@ -8,6 +9,8 @@ class TaintGrindOp
   end
   
   def initialize(line)
+    @line = line
+  
     elems = line.split(" | ")
     if elems[0] =~ /0x\w+: (\w+) \((.+):(\d+)\)/  # e.g. 0x40080D: main (two-taints.c:10)
       @func = $1
@@ -33,7 +36,15 @@ class TaintGrindOp
   end
   
   def to_s
-    return "#@func (#@file:#@lineno)"
+    lines = guess_path(@file).map { |f| File.read(f).split("\n")[@lineno-1] }.find_all { |l| not l.nil? }
+    s = "#@func (#@file:#@lineno):  #{lines[0]}"
+    s += " (found #{lines.length} matching files}" if lines.length > 1
+    return s
+  end
+  
+  def get_path
+    p = @preds.empty? ? [] : @preds.map{|op| op.get_path()}.flatten
+    return p.push self
   end
   
   attr_reader :func, :file, :lineno, :var, :from, :preds, :is_sink
@@ -58,6 +69,9 @@ ARGF.read.split("\n").each do |line|
       tgo.preds.concat(taintgrind_ops[fromvar])
     end
   end
+  if taintgrind_ops.has_key? tgo.var
+    tgo.preds.concat taintgrind_ops[tgo.var]
+  end
   
   if taintgrind_ops.has_key?(tgo.var)
     taintgrind_ops[tgo.var].push(tgo)
@@ -70,4 +84,7 @@ ARGF.read.split("\n").each do |line|
   end
 end
 
-puts sinks
+sinks.each do |sink|
+  puts sink.get_path
+  puts "="*40
+end
