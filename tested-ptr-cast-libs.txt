@@ -47,6 +47,11 @@ The cast found is just used to compare two key nodes from a splay tree. The type
 == xpdf ==
 No casts found unit compilation fails due to semantical analysis errors
 
+== ruby ==
+Total casts: 359 (18 casts of integer constant expressions)
+* Uses a hash table that stores the data as unsigned long; this makes conversion from and to pointers necessary
+* Stores pointers as VALUE in a type uintptr_t (integer capable of storing pointers)
+
 == Summary: Typical usages ==
 * cast of constant integer literals to pointers (e.g. in the libgtk-2)
   (it seems just for trash values)
