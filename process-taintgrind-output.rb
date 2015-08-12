@@ -10,6 +10,7 @@ class TaintGrindOp
   
   def initialize(line)
     @line = line
+    @is_sink = false
   
     elems = line.split(" | ")
     if elems[0] =~ /0x\w+: (\w+) \((.+):(\d+)\)/  # e.g. 0x40080D: main (two-taints.c:10)
@@ -21,6 +22,10 @@ class TaintGrindOp
     if elems[4] =~ /^(.+?) <- (.+?)$/ # e.g. t54_1741 <- t42_1773, t29_4179
       @var = $1
       @from = $2.split(", ")
+    elsif elems[4] =~ /^(.+?) <\*- (.+?)$/ # e.g. t78_744 <*- t72_268
+      @var = $1
+      @from = $2.split(", ")
+      @is_sink = true
     else  # e.g. t54_1741
       @var = elems[4]
       @from = []
@@ -28,8 +33,6 @@ class TaintGrindOp
     
     if elems[1].start_with? "IF "
       @is_sink = true
-    else
-      @is_sink = false
     end
     
     @preds = []
@@ -99,7 +102,7 @@ ARGF.read.split("\n").each do |line|
 end
 
 sinks.each do |sink|
-  puts ">>>> The cast should occur just before that <<<<"
+  puts ">>>> The evil cast should occur just before that <<<<"
   puts sink.get_path
   puts "="*40
 end
