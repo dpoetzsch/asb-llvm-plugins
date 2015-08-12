@@ -41,7 +41,11 @@ class TaintGrindOp
 
   def to_s
     lines = guess_path(@file).map { |f| File.read(f).split("\n")[@lineno-1] }.find_all { |l| not l.nil? }
-    s = "#@func (#@file:#@lineno):  #{lines[0]}"
+    
+    line = lines[0]
+    line = line.red if self.is_sink
+    
+    s = "#@func (#@file:#@lineno):  #{line}"
     s += " (found #{lines.length} matching files}" if lines.length > 1
     return s
   end
@@ -95,6 +99,7 @@ ARGF.read.split("\n").each do |line|
 end
 
 sinks.each do |sink|
+  puts ">>>> The cast should occur just before that <<<<"
   puts sink.get_path
   puts "="*40
 end
