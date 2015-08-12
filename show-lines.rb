@@ -1,12 +1,10 @@
 #!/usr/bin/env ruby
 
-require_relative "colored_str.rb"
+require_relative "colored_str.rb", "util.rb"
 
 def is_pointer_cast_line?(line)
   return (not line.nil? and line =~ /\(.+?\)/) # check if there is a cast-like thing somewhere
 end
-
-allfiles = Dir["**/*"]
 
 $showval = 1
 noconst = false
@@ -52,27 +50,9 @@ ARGF.read.split("\n").each do |line|
   end
 end
 
-def guess_path(filename,lineno)
-    files = allfiles.find_all { |f| f.end_with?(filename) and File.basename(f) == File.basename(filename) }
-    if files.empty?
-      puts"file not found"
-      return nil 
-    elsif files.length == 1
-      return (files[0])
-    else 
-      puts"Found #{files.length} files; guessing correct one"
-      files.each do |file|
-        flines = File.read(file).split("\n")
-        if is_pointer_cast_line?(flines[lineno])
-          return (file)
-        end
-      end
-    end
-  end
-end
-
 cast_lines.each do |filename, lines|
-  files = allfiles.find_all { |f| f.end_with?(filename) and File.basename(f) == File.basename(filename) }
+  # pre-filter the files for this filename
+  files = guess_path(filename)
   
   lines.each do |lineno, msg|
     totalcasts += 1

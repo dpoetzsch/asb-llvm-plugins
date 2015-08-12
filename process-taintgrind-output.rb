@@ -33,7 +33,7 @@ class TaintGrindOp
   end
   
   def to_s
-    return "#@func (#@file:#@lineno)" 
+    return "#@func (#@file:#@lineno)"
   end
   
   attr_reader :func, :file, :lineno, :var, :from, :preds, :is_sink
