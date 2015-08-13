@@ -37,9 +37,14 @@ class TaintGrindOp
     end
     
     @preds = []
+    @successor = nil
   end
   
-  def is_tmp_var
+  def is_source?
+    return @preds.empty?
+  end
+  
+  def is_tmp_var?
     return @var =~ /^t\d+_\d+$/
   end
   
@@ -56,8 +61,6 @@ class TaintGrindOp
   end
 
   def to_s
-    puts
-    puts @line
     lines = self.get_src_lines()
     
     line = lines[0]
@@ -68,45 +71,66 @@ class TaintGrindOp
     return s
   end
   
-  def get_full_path
+  def get_sources
     # we can't use recursion here because the graph can be VERY huge and the
     # stack depth is just not enough for that
-    path = []
+    sources = []
     stack = [self]
-    processed = Set.new
+    visited = Set.new
     
     while not stack.empty?
       op = stack.pop
-      next if processed.include? op
-      processed.add op
       
-      path.push(op) if not block_given? or yield op
-      stack.concat op.preds
+      next if visited.include? op
+      visited.add op
+      
+      if op.is_source?
+        sources.push((not block_given? or yield op) ? op : op.successor)
+      else
+        successor = (not block_given? or yield op) ? op : op.successor
+        op.preds.each { |p| p.successor = successor } # link from where we found this one
+        stack.concat op.preds
+      end
     end
     
-    return path.reverse
+    return sources
   end
   
-  def get_path
-    return get_full_path { |op| (op.is_sink or not op.is_tmp_var) and (not block_given? or yield op) }
+  @@sources_no_tmp = lambda { |op| ((not op.is_tmp_var?) or op.is_sink) and (not block_given? or yield op) }
+  @@sources_no_lib = lambda { |op| not op.get_src_lines.empty? }
+  
+  def self.sources_no_tmp
+    return @@sources_no_tmp
   end
   
-  def get_path_unique
+  def self.sources_no_lib
+    return @@sources_no_lib
+  end
+  
+  def self.new_sources_unique_traces
     locs = Set.new
-    return get_full_path { |op|
+    return lambda { |op|
       loc = [op.file, op.lineno]
-      ret = locs.include?loc
-      locs.add loc
-      p loc if not ret
-      not ret
+      incl = locs.include?(loc)
+      locs.add(loc) if not incl
+      not incl
     }
   end
   
-  def get_path_no_lib
-    return get_path { |op| not op.get_src_lines.empty? }
+  def get_trace_to_sink
+    trace = []
+    cur = self
+    
+    while not cur.nil?
+      trace.push cur
+      cur = cur.successor
+    end
+    
+    return trace
   end
   
   attr_reader :func, :file, :lineno, :var, :from, :preds, :is_sink, :line
+  attr_accessor :successor
 end
 
 ###### CREATE TaintGrindOp GRAPH ##########
@@ -145,8 +169,12 @@ ARGF.read.split("\n").each do |line|
 end
 
 sinks.each do |sink|
-  puts ">>>> The evil cast should occur just before that <<<<"
-  puts sink.get_path
-  puts "="*40
-  break  # TODO REMOVE THIS
+  unique_traces_proc = TaintGrindOp.new_sources_unique_traces
+  sources = sink.get_sources { |op| unique_traces_proc.call(op) and TaintGrindOp.sources_no_tmp.call(op) and TaintGrindOp.sources_no_lib.call(op) }
+  
+  sources.each do |src|
+    puts ">>>> The evil cast should occur just before that <<<<"
+    puts src.get_trace_to_sink
+    puts "="*60
+  end
 end
