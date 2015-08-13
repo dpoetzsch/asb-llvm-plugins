@@ -48,7 +48,7 @@ def rewrite_source(filename, line)
   end
   file.insert(linenumber,"#{type} #{tmpname} = #{type} #{varname};")
   file.insert(linenumber+1, "TNT_MAKE_MEM_TAINTED(&#{tmpname},sizeof(#{tmpname}));")
-  File.open(filename+".castfix", "w") {|f| f.write(file.join("\n"))}
+  File.open(filename, "w") {|f| f.write(file.join("\n"))}
 end
 
 def add_header(filename)
@@ -61,7 +61,9 @@ def add_header(filename)
     end
   end
   if header_included == 0
-    line.insert(0,"#include \"taintgrind.h\"")
+    puts "no taingrind header"
+    file.insert(0,"#include \"taintgrind.h\"")
+    File.open(filename, "w") {|f| f.write(file.join("\n"))}
   end
 end
 
