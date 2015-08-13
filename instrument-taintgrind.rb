@@ -34,25 +34,25 @@ def find_cast_var(line) #Not used, except for debugging
   end
 end
 
-def rewrite_source(filename, linenumber, colno)
+def rewrite_source(filename, linenumber, colstart)
   lines = File.read(filename).split("\n")
   tmpname=get_new_name
   
-  prefix = lines[linenumber][0...colno]
+  prefix = lines[linenumber][0...colstart]
   
-  if lines[linenumber][colno..-1] =~ /^\(([A-Za-z0-9_]+)\) ([A-Za-z0-9_]+)(.+)/
+  if lines[linenumber][colstart..-1] =~ /^\(([A-Za-z0-9_]+)\) ([A-Za-z0-9_]+)(.+)/
     lines[linenumber]= prefix + " " + tmpname + $3
     type = $1
     varname= $2
     cast = "(#{type}) #{varname}"
-    puts "Found cast in #{filename} at #{linenumber}:#{colno}: #{cast.red}; Replacing:"
+    puts "Found cast in #{filename} at #{linenumber}:#{colstart}: #{cast.red}; Replacing:".green
     
     lines.insert(linenumber,"#{type} #{tmpname} = (#{type}) #{varname};")
     lines.insert(linenumber+1, "TNT_MAKE_MEM_TAINTED(&#{tmpname}, sizeof(#{tmpname}));")
     
     puts lines[linenumber..linenumber+2]
     puts 
-    File.open(filename, "w") {|f| f.write(lines.join("\n"))}
+    File.open(filename, "w") {|f| f.write(lines.join("\n") + "\n") }
   else
     puts "Can't find the cast"
   end
@@ -79,7 +79,7 @@ cast_lines = {}
 ARGF.read.split("\n").each do |line|
   if line =~ /cast at\s?(\d+):(\d+).+?in file: (.+\.\w+)/
     lineno = $1.to_i - 1
-    colno = $2.to_i - 1
+    colstart = $2.to_i - 1
     filename = $3
     
     while filename =~ /^\.\.?\/(.+)/ #cuts the ../../filename.c to filename.c
@@ -87,9 +87,9 @@ ARGF.read.split("\n").each do |line|
     end
     
     if cast_lines.has_key? filename
-      cast_lines[filename][[lineno, colno]] = line
+      cast_lines[filename][[lineno, colstart]] = line
     else
-      cast_lines[filename] = {[lineno, colno] => line}
+      cast_lines[filename] = {[lineno, colstart] => line}
     end
   end
 end
@@ -97,16 +97,16 @@ end
 cast_lines.each do |filename, lines|
   files = guess_path(filename)
   lines.each do |linecol,msg|
-    lineno, colno = linecol
+    lineno, colstart = linecol
     if files.empty?
-      puts "file #{filename} not found"
-      return nil
+      puts "File #{filename} not found"
     else
-      puts "found #{files.length} files; guessing correct one"
+      puts "Found #{files.length} files; guessing correct one" if files.length > 1
+
       files.each do |file|
         flines=File.read(file).split("\n")
-        if is_pointer_cast_line?(flines[lineno]) #We use the first file including a cast
-          rewrite_source(file,lineno, colno)
+        if is_pointer_cast_line?(flines[lineno], colstart) #We use the first file including a cast
+          rewrite_source(file,lineno, colstart)
           break
         end
       end
