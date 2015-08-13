@@ -73,12 +73,12 @@ class TaintGrindOp
     # stack depth is just not enough for that
     path = []
     stack = [self]
-    #processed = Set.new
+    processed = Set.new
     
     while not stack.empty?
       op = stack.pop
-      #next if processed.include? op
-      #processed.add op
+      next if processed.include? op
+      processed.add op
       
       path.push(op) if not block_given? or yield op
       stack.concat op.preds
