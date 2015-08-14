@@ -63,7 +63,7 @@ def rewrite_source(filename, linenumber, colstart, last_token_start)
     
     puts lines[linenumber..linenumber+2]
     puts 
-    File.open(filename+"new", "w") {|f| f.write(lines.join("\n") + "\n") }
+    File.open(filename, "w") {|f| f.write(lines.join("\n") + "\n") }
   else
     puts "Can't find the cast"
   end
