@@ -51,11 +51,15 @@ public:
   
   void printMessage(CStyleCastExpr* expr, const char* what) {
     FullSourceLoc fullLocation = context->getFullLoc(expr->getLocStart());
-    if (fullLocation.isValid()) {
+    FullSourceLoc endLocation = context->getFullLoc(expr->getLocEnd());
+    expr->dumpPretty(*context);   
+    if (fullLocation.isValid() && endLocation.isValid()) {
       llvm::outs() << "\033[1;34m Found " << what << " \033[0m"
                    <<  "\033[1;37mcast at " 
                    << fullLocation.getSpellingLineNumber() << ":"
                    << fullLocation.getSpellingColumnNumber() 
+                   << "-"
+                   << endLocation.getSpellingColumnNumber() 
                    << "\033[0m \033[1;31m"
                    << "in file: " << context->getSourceManager().getFilename(fullLocation) 
                    << "\033[0m\n";
