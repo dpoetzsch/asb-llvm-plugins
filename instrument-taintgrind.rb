@@ -86,9 +86,11 @@ def add_header(filename)
 end
 
 cast_lines = {}
+cnt = 0
 
 ARGF.read.split("\n").each do |line|
   if line =~ /cast at\s?(\d+):(\d+)-(\d+).+?in file: (.+\.\w+)/
+    cnt += 1
     lineno = $1.to_i - 1
     colstart = $2.to_i - 1
     last_token_start= $3.to_i - 1
@@ -105,6 +107,8 @@ ARGF.read.split("\n").each do |line|
     end
   end
 end
+
+puts "Found #{cnt} casts"
 
 cast_lines.each do |filename, lines|
   files = guess_path(filename)
