@@ -107,7 +107,7 @@ def add_header(filename)
   if header_included == 0
     puts "Adding #include \"taintgrind.h\"".pink
     lines.insert(0,"#include \"taintgrind.h\"")
-    File.open(filename, "w") {|f| f.write(lines.join("\n"))} if not $dryrun
+    File.open(filename, "w") {|f| f.write(lines.join("\n") + "\n") } if not $dryrun
   end
 end
 
