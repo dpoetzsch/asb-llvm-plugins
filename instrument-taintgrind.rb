@@ -63,7 +63,7 @@ def rewrite_source(filename, linenumber, colstart, last_token_start)
     
     puts lines[linenumber..linenumber+2]
     puts 
-    File.open(filename, "w") {|f| f.write(lines.join("\n") + "\n") }
+    File.open(filename+"new", "w") {|f| f.write(lines.join("\n") + "\n") }
   else
     puts "Can't find the cast"
   end
@@ -81,7 +81,7 @@ def add_header(filename)
   if header_included == 0
     puts "adding #include \"taintgrind.h\""
     lines.insert(0,"#include \"taintgrind.h\"")
-    File.open(filename, "w") {|f| f.write(lines.join("\n"))}
+    File.open(filename+"new", "w") {|f| f.write(lines.join("\n"))}
   end
 end
 
@@ -111,14 +111,18 @@ end
 puts "Found #{cnt} casts"
 
 cast_lines.each do |filename, lines|
-  files = guess_path(filename)
-  lines.each do |linecol,msg|
+  lines = lines.keys.sort.reverse 
+  files = guess_path(filename) 
+  puts files
+  puts "m1"
+  lines.each do |linecol|
+    puts "m2"
+    puts linecol
     lineno, colstart, last_token_start = linecol
     if files.empty?
       puts "File #{filename} not found"
     else
-      puts "Found #{files.length} files; guessing correct one" if files.length > 1
-
+      puts "Found #{files.length} files; guessing correct one" 
       files.each do |file|
         flines=File.read(file).split("\n")
         if is_pointer_cast_line?(flines[lineno], colstart) #We use the first file including a cast
