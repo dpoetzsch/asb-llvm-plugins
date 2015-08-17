@@ -51,12 +51,6 @@ def rewrite_source(filename, lineno, all_cols)
     thecast = castline[colstart..last_token_start]
     suffix = castline[last_token_start+1..-1]
     
-    if $verbose
-      puts "prefix = " + prefix
-      puts "cast = " + thecast
-      puts "suffix = " + suffix
-    end
-    
     if not (thecast[-1] == "]" or thecast[-1] == ")")
       if suffix=~/^([A-Za-z0-9_]+)(.+)$/
          thecast += $1
