@@ -44,8 +44,9 @@ def rewrite_source(filename, lineno, all_cols)
   lines_after = lines[lineno+1..-1]
   
   # start by the last cast
-  all_cols.sort.reverse.each do |cols|
+  all_cols.keys.sort.reverse.each do |cols|
     colstart, last_token_start = cols
+    puts "Original plugin output: " + all_cols[cols] if $verbose
     
     prefix = castline[0...colstart]
     thecast = castline[colstart..last_token_start]
@@ -59,7 +60,7 @@ def rewrite_source(filename, lineno, all_cols)
     end
     
     if thecast =~ /^\(([A-Za-z0-9_]+)\)\s*(.+)$/
-      puts("Found cast in #{filename} at #{lineno}:#{colstart}-#{last_token_start}: ".green + prefix + thecast.red + suffix)
+      puts("Found cast in #{filename} at #{lineno}:#{colstart}-#{last_token_start}: ".green + prefix + thecast.yellow + suffix)
     
       type = $1
       varname= $2
@@ -76,7 +77,7 @@ def rewrite_source(filename, lineno, all_cols)
       puts castline
       puts
     else
-      puts "Can't find the cast"
+      puts "Can't find the cast in #{filename} at #{lineno}:#{colstart}-#{last_token_start}".red
     end
   end
   
@@ -94,7 +95,7 @@ def add_header(filename)
     end
   end
   if header_included == 0
-    puts "Adding #include \"taintgrind.h\"".yellow
+    puts "Adding #include \"taintgrind.h\"".pink
     lines.insert(0,"#include \"taintgrind.h\"")
     File.open(filename, "w") {|f| f.write(lines.join("\n"))} if not $dryrun
   end
@@ -114,7 +115,7 @@ loop do
   end
 end
 
-# {filename => {lineno => [[colstart, last_token_colstart]]} }
+# {filename => {lineno => {[colstart, last_token_colstart] => plugin_line}} }
 cast_lines = {}
 cnt = 0
 
@@ -134,10 +135,10 @@ ARGF.read.split("\n").each do |line|
       cast_lines[filename] = {}
     end
     if not cast_lines[filename].has_key? lineno
-      cast_lines[filename][lineno] = []
+      cast_lines[filename][lineno] = {}
     end
     
-    cast_lines[filename][lineno].push [colstart, last_token_start]
+    cast_lines[filename][lineno][[colstart, last_token_start]] = line
   end
 end
 
@@ -160,8 +161,8 @@ cast_lines.each do |filename, linecols|
       
       files.each do |file|
         flines=File.read(file).split("\n")
-        if is_pointer_cast_line?(flines[lineno], cols[0][0]) #We use the first file including a cast
-          rewrite_source(file,lineno, cols)
+        if is_pointer_cast_line?(flines[lineno], cols.keys[0][0]) #We use the first file including a cast
+          rewrite_source(file, lineno, cols)
           break
         end
       end
