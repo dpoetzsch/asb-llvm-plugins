@@ -3,6 +3,7 @@
 require_relative "util.rb"
 require_relative "colored_str.rb"
 
+$dryrun = false
 $count=0
 
 def get_new_name ()
@@ -63,7 +64,7 @@ def rewrite_source(filename, linenumber, colstart, last_token_start)
     
     puts lines[linenumber..linenumber+2]
     puts 
-    File.open(filename+"new", "w") {|f| f.write(lines.join("\n") + "\n") }
+    File.open(filename, "w") {|f| f.write(lines.join("\n") + "\n") } if not $dryrun
   else
     puts "Can't find the cast"
   end
@@ -87,6 +88,17 @@ end
 
 cast_lines = {}
 cnt = 0
+
+# process cli arguments
+loop do
+  case ARGV[0]
+  when "-dryrun"
+    $dryrun = true
+    ARGV.shift
+  else
+    break
+  end
+end
 
 ARGF.read.split("\n").each do |line|
   if line =~ /cast at\s?(\d+):(\d+)-(\d+).+?in file: (.+\.\w+)/
