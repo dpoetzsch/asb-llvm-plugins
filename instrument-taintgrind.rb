@@ -182,6 +182,7 @@ cast_lines.each do |filename, linecols|
   add_header(files[0])
 end 
 
-
+puts "The following files were affected by this operation:"
+puts cast_lines.keys.join(" ")
 
 
