@@ -78,7 +78,9 @@ def rewrite_source(filename, lineno, all_cols)
       puts castline
       puts
     else
-      puts "Can't find the cast in #{filename} at #{lineno}:#{colstart}-#{last_token_start}".red
+      puts "Can't find the cast in #{filename} at #{lineno}:#{colstart}-#{last_token_start}:".red
+      puts castline
+      puts
     end
   end
   
