@@ -47,6 +47,7 @@ def rewrite_source(filename, lineno, all_cols)
   all_cols.keys.sort.reverse.each do |cols|
     colstart, last_token_start = cols
     puts "Original plugin output: " + all_cols[cols] if $verbose
+    puts "Found cast line is: #{castline}" if $verbose
     
     prefix = castline[0...colstart]
     thecast = castline[colstart..last_token_start]
