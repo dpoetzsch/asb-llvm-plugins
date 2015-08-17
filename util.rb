@@ -7,5 +7,5 @@ def guess_path(filename, allfiles=ALL_FILES)
 end
 
 def is_pointer_cast_line?(line, colstart)
-  return (not line.nil? and line[colstart..-1] =~ /^\(.+?\)\s*.+$/) # check if there is a cast-like thing starting at colstart
+  return (not line.nil? and line[colstart-1..-1] =~ /^\(.+?\)\s*.+$/) # check if there is a cast-like thing starting at colstart
 end

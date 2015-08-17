@@ -39,9 +39,9 @@ end
 def rewrite_source(filename, lineno, all_cols)
   lines = File.read(filename).split("\n")
   
-  lines_before = lines[0...lineno]
-  castline = lines[lineno]
-  lines_after = lines[lineno+1..-1]
+  lines_before = lines[0...lineno-1]
+  castline = lines[lineno-1]
+  lines_after = lines[lineno..-1]
   
   # start by the last cast
   all_cols.keys.sort.reverse.each do |cols|
@@ -50,15 +50,15 @@ def rewrite_source(filename, lineno, all_cols)
     puts "Found cast line is: #{castline}" if $verbose
     
     if colstart >= last_token_start or last_token_start > castline.length
-      puts "Invalid column numbers  in #{filename} at #{lineno}:#{colstart}-#{last_token_start}:".red
+      puts "Invalid column numbers in #{filename} at #{lineno}:#{colstart}-#{last_token_start}:".red
       puts castline
       puts
       next
     end
     
-    prefix = castline[0...colstart]
-    thecast = castline[colstart..last_token_start]
-    suffix = castline[last_token_start+1..-1]
+    prefix = castline[0...colstart-1]
+    thecast = castline[colstart-1..last_token_start-1]
+    suffix = castline[last_token_start..-1]
     
     if thecast[-1] != "]" and thecast[-1] != ")"
       if suffix=~/^([A-Za-z0-9_]+)(.+)$/
@@ -132,9 +132,9 @@ cnt = 0
 ARGF.read.split("\n").each do |line|
   if line =~ /cast at\s?(\d+):(\d+)-(\d+).+?in file: (.+\.\w+)/
     cnt += 1
-    lineno = $1.to_i - 1
-    colstart = $2.to_i - 1
-    last_token_start= $3.to_i - 1
+    lineno = $1.to_i
+    colstart = $2.to_i
+    last_token_start= $3.to_i
     filename = $4
     
     while filename =~ /^\.\.?\/(.+)/ #cuts the ../../filename.c to filename.c
@@ -171,7 +171,7 @@ cast_lines.each do |filename, linecols|
       
       files.each do |file|
         flines=File.read(file).split("\n")
-        if is_pointer_cast_line?(flines[lineno], cols.keys[0][0]) #We use the first file including a cast
+        if is_pointer_cast_line?(flines[lineno-1], cols.keys[0][0]) #We use the first file including a cast
           rewrite_source(file, lineno, cols)
           break
         end
