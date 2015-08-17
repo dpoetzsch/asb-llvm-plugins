@@ -49,11 +49,18 @@ def rewrite_source(filename, lineno, all_cols)
     puts "Original plugin output: " + all_cols[cols] if $verbose
     puts "Found cast line is: #{castline}" if $verbose
     
+    if colstart >= last_token_start or last_token_start > castline.length
+      puts "Invalid column numbers  in #{filename} at #{lineno}:#{colstart}-#{last_token_start}:".red
+      puts castline
+      puts
+      next
+    end
+    
     prefix = castline[0...colstart]
     thecast = castline[colstart..last_token_start]
     suffix = castline[last_token_start+1..-1]
     
-    if not (thecast[-1] == "]" or thecast[-1] == ")")
+    if thecast[-1] != "]" and thecast[-1] != ")"
       if suffix=~/^([A-Za-z0-9_]+)(.+)$/
          thecast += $1
          suffix = $2
