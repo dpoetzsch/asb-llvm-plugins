@@ -82,7 +82,7 @@ def add_header(filename)
   if header_included == 0
     puts "adding #include \"taintgrind.h\""
     lines.insert(0,"#include \"taintgrind.h\"")
-    File.open(filename+"new", "w") {|f| f.write(lines.join("\n"))}
+    File.open(filename, "w") {|f| f.write(lines.join("\n"))} if not $dryrun
   end
 end
 
@@ -123,18 +123,18 @@ end
 puts "Found #{cnt} casts"
 
 cast_lines.each do |filename, lines|
-  lines = lines.keys.sort.reverse 
-  files = guess_path(filename) 
-  puts files
-  puts "m1"
-  lines.each do |linecol|
-    puts "m2"
-    puts linecol
+  puts "="*80
+  
+  files = guess_path(filename)
+  linecols = lines.keys.sort.reverse
+  
+  linecols.each do |linecol|
     lineno, colstart, last_token_start = linecol
+    
     if files.empty?
       puts "File #{filename} not found"
     else
-      puts "Found #{files.length} files; guessing correct one" 
+      puts "Found #{files.length} files; guessing correct one" if files.length > 1
       files.each do |file|
         flines=File.read(file).split("\n")
         if is_pointer_cast_line?(flines[lineno], colstart) #We use the first file including a cast
@@ -146,8 +146,6 @@ cast_lines.each do |filename, lines|
   end
   
   add_header(files[0])
-  
-  puts "="*80
 end 
 
 
