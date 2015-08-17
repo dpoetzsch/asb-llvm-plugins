@@ -67,7 +67,7 @@ def rewrite_source(filename, lineno, all_cols)
       end
     end
     
-    if thecast =~ /^\(([A-Za-z0-9_]+)\)\s*(.+)$/
+    if thecast =~ /^\(([A-Za-z0-9_ ]+)\)\s*(.+)$/
       puts("Found cast in #{filename} at #{lineno}:#{colstart}-#{last_token_start}: ".green + prefix + thecast.yellow + suffix)
     
       type = $1
