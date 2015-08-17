@@ -78,8 +78,7 @@ def rewrite_source(filename, lineno, all_cols)
       # replace cast line
       castline = prefix + " " + tmpname + " " + suffix
       
-      lines_before.push "#{type} #{tmpname};"
-      lines_before.push "#{tmpname} = (#{type}) #{varname};"
+      lines_before.push "#{type} #{tmpname} = (#{type}) #{varname};"
       lines_before.push "TNT_MAKE_MEM_TAINTED(&#{tmpname}, sizeof(#{tmpname}));"
       
       puts lines_before[-2..-1]
