@@ -73,17 +73,21 @@ def rewrite_source(filename, lineno, all_cols)
       type = $1
       varname= $2
       
-      tmpname = get_new_name()
+      if varname.strip != "NULL"
+        tmpname = get_new_name()
       
-      # replace cast line
-      castline = prefix + " " + tmpname + " " + suffix
-      
-      lines_before.push "#{type} #{tmpname} = (#{type}) #{varname};"
-      lines_before.push "TNT_MAKE_MEM_TAINTED(&#{tmpname}, sizeof(#{tmpname}));"
-      
-      puts lines_before[-2..-1]
-      puts castline
-      puts
+        # replace cast line
+        castline = prefix + " " + tmpname + " " + suffix
+        
+        lines_before.push "#{type} #{tmpname} = (#{type}) #{varname};"
+        lines_before.push "TNT_MAKE_MEM_TAINTED(&#{tmpname}, sizeof(#{tmpname}));"
+        
+        puts lines_before[-2..-1]
+        puts castline
+        puts
+      else
+        puts "Cast was a NULL-cast, doing nothing."
+      end
     else
       puts "Can't find the cast in #{filename} at #{lineno}:#{colstart}-#{last_token_start}:".red
       puts castline
