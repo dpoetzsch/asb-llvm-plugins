@@ -133,6 +133,60 @@ class TaintGrindOp
   attr_accessor :successor
 end
 
+###### PROCESS CLI ARGS ##########
+
+HELPTEXT = <<HELP
+Usage: process-taintgrind-output.rb [flags] <TAINTGRIND OUTPUT LOG>
+The taintgrind output can also be piped into stdin.
+
+This finds traces in the taintgrind output that lead to dangerous behavior.
+Dangerous behavior is the dereferencing tainted values or their usage in
+conditions. Tainted values are values derived from casts from pointers to
+integrals.
+
+Flags:
+ -libs=yes|no         In the traces, show lines that are located in 3rd-party-
+                      libraries. Specifically, a line is considered to be in a
+                      library, if the source file cannot be found below the
+                      current working directory. Default is no.
+ -tmp-instr=yes|no    In the traces, show lines that affect only temporary
+                      variables inserted by valgrind. Default is no.
+ -unique-locs=yes|no  In the traces, show the same source location twice (e.g.
+                      in a loop). This makes the trace more complete but can
+                      lead to very big traces. Default is yes.
+ -src-only            Show only the sources, not the full trace.
+HELP
+
+nolib = true
+notmp = true
+unique_locs = true
+src_only = false
+
+loop do
+  case ARGV[0]
+  when "-h", "--help", "-help"
+    puts HELPTEXT
+    exit
+  when /^-libs=(yes|no)$/
+    nolib = $1 == "no"
+    ARGV.shift
+  when /^-tmp-instr=(yes|no)$/
+    notmp = $1 == "no"
+    ARGV.shift
+  when /^-unique-locs=(yes|no)$/
+    unique_locs = $1 == "yes"
+    ARGV.shift
+  when "-src-only"
+    src_only = true
+    ARGV.shift
+  when /^-/
+    puts "Unrecognized argument #{ARGV[0]}"
+    exit
+  else
+    break
+  end
+end
+
 ###### CREATE TaintGrindOp GRAPH ##########
 
 # var -> TaintGrindOp
@@ -168,13 +222,21 @@ ARGF.read.split("\n").each do |line|
   end
 end
 
+###### SHOW TRACES ##########
+
 sinks.each do |sink|
   unique_traces_proc = TaintGrindOp.new_sources_unique_traces
-  sources = sink.get_sources { |op| unique_traces_proc.call(op) and TaintGrindOp.sources_no_tmp.call(op) and TaintGrindOp.sources_no_lib.call(op) }
+  sources = sink.get_sources { |op| (not unique_locs or unique_traces_proc.call(op)) and
+    (not notmp or TaintGrindOp.sources_no_tmp.call(op)) and
+    (not nolib or TaintGrindOp.sources_no_lib.call(op)) }
   
   sources.each do |src|
     puts ">>>> The evil cast should occur just before that <<<<"
-    puts src.get_trace_to_sink
-    puts "="*60
+    if src_only
+      puts src
+    else
+      puts src.get_trace_to_sink
+    end
+    puts "="*80
   end
 end
