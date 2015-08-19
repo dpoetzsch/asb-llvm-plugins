@@ -87,7 +87,7 @@ class TaintGrindOp
       if op.is_source?
         sources.push((not block_given? or yield op) ? op : op.successor)
       else
-        successor = (not block_given? or yield op) ? op : op.successor
+        successor = (op.successor.nil? or not block_given? or yield op) ? op : op.successor
         op.preds.each { |p| p.successor = successor } # link from where we found this one
         stack.concat op.preds
       end
